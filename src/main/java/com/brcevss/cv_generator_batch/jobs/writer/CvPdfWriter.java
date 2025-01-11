@@ -6,12 +6,13 @@ import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.ItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-
 import com.itextpdf.kernel.colors.ColorConstants;
 import com.itextpdf.layout.element.Table;
 import com.itextpdf.layout.properties.UnitValue;
@@ -24,6 +25,8 @@ import java.io.FileNotFoundException;
 @Component
 public class CvPdfWriter implements ItemWriter<Candidat> {
 
+    private static final Logger log = LoggerFactory.getLogger(CvPdfWriter.class);
+
     @Autowired
     private final ChatGptService chatGptService;
 
@@ -35,13 +38,19 @@ public class CvPdfWriter implements ItemWriter<Candidat> {
     public void write(Chunk<? extends Candidat> items) throws Exception {
         for (Candidat candidat : items) {
             String filename = candidat.getNom() + "_" + candidat.getPrenom() + "_CV.pdf";
-            generatePdf(candidat, filename);
-            Thread.sleep(500);
+            try {
+                generatePdf(candidat, filename);
+                log.info("PDF généré avec succès pour le candidat: {} {}", candidat.getNom(), candidat.getPrenom());
+                Thread.sleep(500);
+            } catch (Exception e) {
+                log.error("Erreur lors de la génération du PDF pour le candidat: {} {}", candidat.getNom(), candidat.getPrenom(), e);
+            }
         }
     }
 
     public void generatePdf(Candidat candidat, String filename) {
         try {
+            log.info("Début de la génération du PDF pour le candidat: {} {}", candidat.getNom(), candidat.getPrenom());
             PdfWriter writer = new PdfWriter(filename);
             PdfDocument pdf = new PdfDocument(writer);
             Document document = new Document(pdf);
@@ -88,8 +97,11 @@ public class CvPdfWriter implements ItemWriter<Candidat> {
             document.add(new Paragraph(resume));
 
             document.close();
+            log.info("Fin de la génération du PDF pour le candidat: {} {}", candidat.getNom(), candidat.getPrenom());
         } catch (FileNotFoundException e) {
-            e.printStackTrace();
+            log.error("Fichier non trouvé lors de la génération du PDF pour le candidat: {} {}", candidat.getNom(), candidat.getPrenom(), e);
+        } catch (Exception e) {
+            log.error("Erreur lors de la génération du PDF pour le candidat: {} {}", candidat.getNom(), candidat.getPrenom(), e);
         }
     }
 }
