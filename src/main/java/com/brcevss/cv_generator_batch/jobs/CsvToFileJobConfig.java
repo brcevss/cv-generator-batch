@@ -1,8 +1,8 @@
 package com.brcevss.cv_generator_batch.jobs;
 
+import ch.qos.logback.classic.Logger;
+import com.brcevss.cv_generator_batch.jobs.writer.CvPdfWriter;
 import com.brcevss.cv_generator_batch.model.Candidat;
-import lombok.extern.slf4j.Slf4j;
-import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.batch.core.Job;
 import org.springframework.batch.core.Step;
@@ -21,18 +21,21 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.transaction.PlatformTransactionManager;
 
-@Slf4j
 @Configuration
 @EnableBatchProcessing
 public class CsvToFileJobConfig {
 
-    private static final Logger log = LoggerFactory.getLogger(CsvToFileJobConfig.class);
+    @Autowired
+    private JobRepository jobRepository;
 
     @Autowired
-    public JobRepository jobRepository;
+    private PlatformTransactionManager platformTransactionManager;
 
     @Autowired
-    public PlatformTransactionManager platformTransactionManager;
+    private CvPdfWriter cvPdfWriter;
+
+    private static final Logger log = (Logger) LoggerFactory.getLogger(CsvToFileJobConfig.class);
+
 
     @Bean
     public Job csvToFile() {
@@ -46,7 +49,7 @@ public class CsvToFileJobConfig {
         return new StepBuilder("csvToFileStep", jobRepository)
                 .<Candidat, Candidat>chunk(10, platformTransactionManager)
                 .reader(csvReader())
-                .writer(listCandidatWriter())
+                .writer(cvPdfWriter)
                 .build();
     }
 
