@@ -8,7 +8,7 @@ import org.json.*;
 
 @Service
 public class ChatGptService {
-    private static final String API_URL = "https://api.openai.com/v1/completions";
+    private static final String API_URL = "https://api.openai.com/v1/chat/completions";
 
     @Value("${api.key}")
     private String API_KEY;
@@ -16,11 +16,19 @@ public class ChatGptService {
     public String generateText(String prompt) {
         RestTemplate restTemplate = new RestTemplate();
 
-        // Création du corps de la requête
+        // Création du corps de la requête pour GPT-4
         JSONObject requestBody = new JSONObject();
-        requestBody.put("model", "text-davinci-003");
-        requestBody.put("prompt", prompt);
-        requestBody.put("max_tokens", 150);
+        requestBody.put("model", "gpt-4o-mini");
+        requestBody.put("messages", new JSONArray()
+                .put(new JSONObject()
+                        .put("role", "system")
+                        .put("content", "You are a helpful assistant."))
+                .put(new JSONObject()
+                        .put("role", "user")
+                        .put("content", prompt))
+        );
+        requestBody.put("max_tokens", 50);
+        requestBody.put("temperature", 0.7);
 
         // Configuration des en-têtes
         HttpHeaders headers = new HttpHeaders();
@@ -34,6 +42,10 @@ public class ChatGptService {
         // Traitement de la réponse
         String responseBody = response.getBody();
         JSONObject jsonResponse = new JSONObject(responseBody);
-        return jsonResponse.getJSONArray("choices").getJSONObject(0).getString("text");
+
+        return jsonResponse.getJSONArray("choices")
+                .getJSONObject(0)
+                .getJSONObject("message")
+                .getString("content");
     }
 }

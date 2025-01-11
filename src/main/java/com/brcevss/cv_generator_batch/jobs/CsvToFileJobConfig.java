@@ -10,11 +10,9 @@ import org.springframework.batch.core.configuration.annotation.EnableBatchProces
 import org.springframework.batch.core.job.builder.JobBuilder;
 import org.springframework.batch.core.repository.JobRepository;
 import org.springframework.batch.core.step.builder.StepBuilder;
-import org.springframework.batch.item.Chunk;
 import org.springframework.batch.item.file.FlatFileItemReader;
 import org.springframework.batch.item.file.builder.FlatFileItemReaderBuilder;
 import org.springframework.batch.item.file.mapping.BeanWrapperFieldSetMapper;
-import org.springframework.batch.item.support.ListItemWriter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -65,15 +63,5 @@ public class CsvToFileJobConfig {
                     setTargetType(Candidat.class);
                 }})
                 .build();
-    }
-
-    @Bean
-    public ListItemWriter<Candidat> listCandidatWriter() {
-        return new ListItemWriter<>() {
-            @Override
-            public void write(Chunk<? extends Candidat> items) {
-                items.forEach(item -> log.info("Candidat lu : {}", item));
-            }
-        };
     }
 }
