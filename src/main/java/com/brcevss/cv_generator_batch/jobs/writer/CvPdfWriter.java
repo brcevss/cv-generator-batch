@@ -30,25 +30,6 @@ public class CvPdfWriter implements ItemWriter<Candidat> {
         }
     }
 
-/*    public static void generatePdf(Candidat candidat, String filename) {
-        try {
-            PdfWriter writer = new PdfWriter(filename);
-            PdfDocument pdf = new PdfDocument(writer);
-            Document document = new Document(pdf);
-
-            document.add(new Paragraph("CV - " + candidat.getPrenom() + " " + candidat.getNom()));
-            document.add(new Paragraph("Email: " + candidat.getEmail()));
-            document.add(new Paragraph("Compétences:"));
-            document.add(new Paragraph(String.join(", ", candidat.getCompetences())));
-
-            // Ajoute d'autres informations selon ton besoin (expérience, formation, etc.)
-
-            document.close();
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-    }*/
-
     public static void generatePdf(Candidat candidat, String filename) {
         try {
             PdfWriter writer = new PdfWriter(filename);
